@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Categorías')}">
+    <title>Categorías</title>
+</head>
+<body th:replace="~{layout :: panel('categorias', ~{::contenido})}">
+<div th:fragment="contenido">
+    <div class="container-fluid py-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1"><i class="bi bi-tags"></i> Gestión de Categorías</h2>
+            </div>
+            <button type="button" class="btn btn-primary" id="btnNuevo">
+                <i class="bi bi-plus-circle"></i> Nueva Categoría
+            </button>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="buscar" class="form-label fw-semibold">Buscar categoría</label>
+                        <div class="input-group caja-busqueda">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" id="buscar" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="w-100 overflow-hidden">
+                    <table id="tabla" class="table table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Estado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="c : ${listacategorias}">
+                                <td th:text="${c.idCategoria}"></td>
+                                <td th:text="${c.nombre}"></td>
+                                <td th:text="${c.descripcion}"></td>
+                                <td>
+                                    <span th:if="${c.estado == 1}" class="badge bg-success">Activo</span>
+                                    <span th:if="${c.estado == 0}" class="badge bg-secondary">Inactivo</span>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-warning btn-sm" title="Editar"
+                                            th:data-id="${c.idCategoria}"
+                                            th:data-nombre="${c.nombre}"
+                                            th:data-descripcion="${c.descripcion}"
+                                            th:data-estado="${c.estado}"
+                                            onclick="editar(this)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm"
+                                            th:classappend="${c.estado == 1} ? 'btn-danger' : 'btn-success'"
+                                            th:title="${c.estado == 1} ? 'Inactivar' : 'Activar'"
+                                            th:data-id="${c.idCategoria}"
+                                            th:data-nombre="${c.nombre}"
+                                            th:data-estado="${c.estado}"
+                                            onclick="cambiarEstado(this)">
+                                        <i class="bi" th:classappend="${c.estado == 1} ? 'bi-slash-circle' : 'bi-check-circle'"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalForm" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="tituloModal"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formulario" th:action="@{/registrarcategoria}" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="idCategoria" name="idCategoria">
+                        <input type="hidden" id="estado" name="estado" value="1">
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label fw-semibold">Nombre</label>
+                            <input type="text" id="nombre" name="nombre" class="form-control" maxlength="60" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="descripcion" class="form-label fw-semibold">Descripción</label>
+                            <input type="text" id="descripcion" name="descripcion" class="form-control" maxlength="150">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="btnGuardar"></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <form id="formEstado" th:action="@{/estadocategoria}" method="post">
+        <input type="hidden" id="idEstado" name="id">
+    </form>
+
+    <script>
+        const tabla = crearTabla("#tabla", "categorías");
+        conectarBuscador("buscar", tabla);
+
+        const formulario = document.getElementById("formulario");
+        const modal = new bootstrap.Modal(document.getElementById("modalForm"));
+
+        // nuevo registro
+        document.getElementById("btnNuevo").addEventListener("click", function () {
+            document.getElementById("tituloModal").innerHTML = '<i class="bi bi-tags"></i> Registrar Categoría';
+            formulario.action = "/registrarcategoria";
+            formulario.reset();
+            document.getElementById("idCategoria").value = "";
+            document.getElementById("estado").value = "1";
+            document.getElementById("btnGuardar").innerHTML = '<i class="bi bi-save"></i> Guardar';
+            modal.show();
+        });
+
+        // cargar los datos en el formulario para editar
+        function editar(boton) {
+            document.getElementById("idCategoria").value = boton.dataset.id;
+            document.getElementById("nombre").value = boton.dataset.nombre;
+            document.getElementById("descripcion").value = boton.dataset.descripcion || "";
+            document.getElementById("estado").value = boton.dataset.estado;
+            document.getElementById("tituloModal").innerHTML = '<i class="bi bi-pencil-square"></i> Editar Categoría';
+            formulario.action = "/actualizarcategoria";
+            document.getElementById("btnGuardar").innerHTML = '<i class="bi bi-save"></i> Actualizar';
+            modal.show();
+        }
+
+        // activar o inactivar
+        function cambiarEstado(boton) {
+            const accion = boton.dataset.estado === "1" ? "inactivar" : "activar";
+            document.getElementById("idEstado").value = boton.dataset.id;
+            confirmarEnvio("formEstado", "¿Desea " + accion + " la categoría?", boton.dataset.nombre,
+                           "Sí, " + accion);
+        }
+    </script>
+</div>
+</body>
+</html>

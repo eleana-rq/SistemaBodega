@@ -1,0 +1,88 @@
+<jasperReport name="VentasPorPeriodo" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" whenNoDataType="AllSectionsNoDetail">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="miConexion"/>
+	<parameter name="fechaInicio" class="java.lang.String"/>
+	<parameter name="fechaFin" class="java.lang.String"/>
+	<query language="sql"><![CDATA[SELECT
+    v.nro_boleta,
+    v.fecha,
+    u.usuario AS cajero,
+    v.total,
+    CASE WHEN v.estado = 1 THEN 'Registrada' ELSE 'Anulada' END AS estado
+FROM tb_venta v
+INNER JOIN tb_usuario u
+    ON v.id_usuario = u.id_usuario
+WHERE DATE(v.fecha) BETWEEN $P{fechaInicio} AND $P{fechaFin}
+ORDER BY v.fecha]]></query>
+	<field name="nro_boleta" class="java.lang.String"/>
+	<field name="fecha" class="java.sql.Timestamp"/>
+	<field name="cajero" class="java.lang.String"/>
+	<field name="total" class="java.math.BigDecimal"/>
+	<field name="estado" class="java.lang.String"/>
+	<variable name="totalVentas" class="java.math.BigDecimal" calculation="Sum">
+		<expression><![CDATA[$F{estado}.equals("Registrada") ? $F{total} : java.math.BigDecimal.ZERO]]></expression>
+	</variable>
+	<background splitType="Stretch"/>
+	<title height="40" splitType="Stretch">
+		<element kind="staticText" x="0" y="5" width="555" height="30" fontSize="16.0" bold="true">
+			<text><![CDATA[REPORTE DE VENTAS POR PERIODO]]></text>
+		</element>
+	</title>
+	<pageHeader height="30" splitType="Stretch">
+		<element kind="staticText" x="0" y="5" width="50" height="20" bold="true">
+			<text><![CDATA[Desde:]]></text>
+		</element>
+		<element kind="textField" x="50" y="5" width="100" height="20">
+			<expression><![CDATA[$P{fechaInicio}]]></expression>
+		</element>
+		<element kind="staticText" x="170" y="5" width="50" height="20" bold="true">
+			<text><![CDATA[Hasta:]]></text>
+		</element>
+		<element kind="textField" x="220" y="5" width="100" height="20">
+			<expression><![CDATA[$P{fechaFin}]]></expression>
+		</element>
+	</pageHeader>
+	<columnHeader height="25" splitType="Stretch">
+		<element kind="staticText" x="0" y="5" width="100" height="20" bold="true">
+			<text><![CDATA[Boleta]]></text>
+		</element>
+		<element kind="staticText" x="100" y="5" width="130" height="20" bold="true">
+			<text><![CDATA[Fecha]]></text>
+		</element>
+		<element kind="staticText" x="230" y="5" width="110" height="20" bold="true">
+			<text><![CDATA[Cajero]]></text>
+		</element>
+		<element kind="staticText" x="340" y="5" width="90" height="20" bold="true">
+			<text><![CDATA[Total]]></text>
+		</element>
+		<element kind="staticText" x="430" y="5" width="125" height="20" bold="true">
+			<text><![CDATA[Estado]]></text>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<element kind="textField" x="0" y="2" width="100" height="20">
+				<expression><![CDATA[$F{nro_boleta}]]></expression>
+			</element>
+			<element kind="textField" x="100" y="2" width="130" height="20" pattern="dd/MM/yyyy HH:mm">
+				<expression><![CDATA[$F{fecha}]]></expression>
+			</element>
+			<element kind="textField" x="230" y="2" width="110" height="20">
+				<expression><![CDATA[$F{cajero}]]></expression>
+			</element>
+			<element kind="textField" x="340" y="2" width="90" height="20" pattern="#,##0.00">
+				<expression><![CDATA[$F{total}]]></expression>
+			</element>
+			<element kind="textField" x="430" y="2" width="125" height="20">
+				<expression><![CDATA[$F{estado}]]></expression>
+			</element>
+		</band>
+	</detail>
+	<summary height="40" splitType="Stretch">
+		<element kind="staticText" x="230" y="10" width="110" height="20" bold="true">
+			<text><![CDATA[TOTAL VENDIDO S/]]></text>
+		</element>
+		<element kind="textField" x="340" y="10" width="90" height="20" bold="true" pattern="#,##0.00">
+			<expression><![CDATA[$V{totalVentas}]]></expression>
+		</element>
+	</summary>
+</jasperReport>

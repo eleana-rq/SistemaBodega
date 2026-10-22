@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Historial de Ventas')}">
+    <title>Historial de Ventas</title>
+</head>
+<body th:replace="~{layout :: panel('ventas', ~{::contenido})}">
+<div th:fragment="contenido" th:with="esAdmin=${usuarioSesion.rol.nombre == 'Administrador'}">
+    <div class="container-fluid py-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1"><i class="bi bi-receipt"></i> Historial de Ventas</h2>
+            </div>
+            <a th:if="${usuarioSesion.rol.nombre == 'Cajero'}" th:href="@{/nuevaventa}" class="btn btn-primary">
+                <i class="bi bi-cart-plus"></i> Nueva venta
+            </a>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="buscar" class="form-label fw-semibold">Buscar venta</label>
+                        <div class="input-group caja-busqueda">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" id="buscar" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="w-100 overflow-auto">
+                    <table id="tabla" class="table table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>N° Boleta</th>
+                                <th>Fecha</th>
+                                <th>Cajero</th>
+                                <th class="text-center">Ítems</th>
+                                <th class="text-end">Total</th>
+                                <th>Estado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="v : ${listaventas}">
+                                <td class="fw-semibold" th:text="${v.nroBoleta}"></td>
+                                <td th:text="${#temporals.format(v.fecha, 'dd/MM/yyyy HH:mm')}"
+                                    th:data-order="${#temporals.format(v.fecha, 'yyyyMMddHHmmss')}"></td>
+                                <td th:text="${v.usuario.nombreCompleto}"></td>
+                                <td class="text-center" th:text="${#lists.size(v.detalles)}"></td>
+                                <td class="text-end" th:text="'S/ ' + ${#numbers.formatDecimal(v.total, 1, 2, 'POINT')}"></td>
+                                <td>
+                                    <span th:if="${v.estado == 1}" class="badge bg-success">Registrada</span>
+                                    <span th:if="${v.estado == 0}" class="badge bg-danger" th:title="${v.motivoAnulacion}">Anulada</span>
+                                </td>
+                                <td class="text-center">
+                                    <a th:href="@{/boleta/{id}(id=${v.idVenta})}" target="_blank"
+                                       class="btn btn-secondary btn-sm" title="Ver / imprimir boleta">
+                                        <i class="bi bi-printer"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-danger btn-sm" title="Anular venta"
+                                            th:if="${esAdmin and v.estado == 1}"
+                                            th:data-id="${v.idVenta}"
+                                            th:data-boleta="${v.nroBoleta}"
+                                            onclick="anular(this)">
+                                        <i class="bi bi-x-octagon"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form id="formAnular" th:action="@{/anularventa}" method="post">
+        <input type="hidden" id="idAnular" name="id">
+        <input type="hidden" id="motivoAnular" name="motivo">
+    </form>
+
+    <script>
+        const tabla = crearTabla("#tabla", "ventas", { order: [] });
+        conectarBuscador("buscar", tabla);
+
+        // anular venta
+        function anular(boton) {
+            Swal.fire({
+                title: "Anular boleta " + boton.dataset.boleta,
+                text: "Se restituirá el stock de los productos vendidos.",
+                icon: "warning",
+                input: "text",
+                inputLabel: "Motivo de la anulación",
+                inputValidator: function (valor) {
+                    if (!valor || !valor.trim()) {
+                        return "Debe indicar el motivo.";
+                    }
+                },
+                showCancelButton: true,
+                confirmButtonText: "Sí, anular",
+                cancelButtonText: "Cancelar"
+            }).then(function (resultado) {
+                if (resultado.isConfirmed) {
+                    document.getElementById("idAnular").value = boton.dataset.id;
+                    document.getElementById("motivoAnular").value = resultado.value;
+                    document.getElementById("formAnular").submit();
+                }
+            });
+        }
+    </script>
+</div>
+</body>
+</html>

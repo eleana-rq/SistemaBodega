@@ -1,0 +1,775 @@
+
+/* =========================================================
+   SISTEMABODEGA
+   ESTILOS GENERALES Y DASHBOARD ADMINISTRATIVO
+   ========================================================= */
+
+
+/* =========================================================
+   1. ESTILOS GENERALES
+   Se utilizan en las paginas administrativas y los CRUD.
+   ========================================================= */
+
+body {
+    margin: 0;
+    background-color: #f5f6f8;
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #243247;
+}
+
+/* Apariencia general de las tarjetas de Bootstrap */
+.card {
+    border-radius: 12px;
+}
+
+/* Evitamos espacio innecesario debajo de las tablas */
+.table {
+    margin-bottom: 0;
+}
+
+/* Separamos los botones pequenos de las tablas */
+.btn-sm {
+    margin: 2px;
+}
+
+
+/* =========================================================
+   2. VARIABLES Y ESTRUCTURA DEL DASHBOARD
+   ========================================================= */
+
+.dashboard-page {
+    --dashboard-blue: #123b68;
+    --dashboard-blue-light: #24568b;
+    --dashboard-sidebar: #102b49;
+    --dashboard-accent: #2563eb;
+    --dashboard-background: #f4f7fb;
+    --dashboard-text: #243247;
+    --dashboard-muted: #718096;
+    --dashboard-border: #e3eaf3;
+
+    min-height: 100vh;
+    margin: 0;
+    background-color: var(--dashboard-background);
+    color: var(--dashboard-text);
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.dashboard-page *,
+.dashboard-page *::before,
+.dashboard-page *::after {
+    box-sizing: border-box;
+}
+
+/* Distribucion principal: menu lateral y area de trabajo */
+.dashboard-page .dashboard-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.dashboard-page .main-area {
+    flex: 1;
+    min-width: 0;
+	min-height: 100vh;
+	   display: flex;
+	   flex-direction: column;
+}
+
+
+/* =========================================================
+   3. MENU LATERAL
+   ========================================================= */
+
+.dashboard-page .sidebar {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+
+    width: 260px;
+    min-width: 260px;
+    min-height: 100vh;
+
+    background-color: var(--dashboard-sidebar);
+    color: #ffffff;
+}
+
+/* Nombre y logotipo del sistema */
+.dashboard-page .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 25px 20px;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.dashboard-page .brand-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    width: 43px;
+    height: 43px;
+
+    border-radius: 12px;
+    background-color: var(--dashboard-accent);
+    color: #ffffff;
+    font-size: 23px;
+}
+
+.dashboard-page .sidebar-brand h5 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.dashboard-page .sidebar-brand small {
+    display: block;
+    margin-top: 5px;
+    color: #b9c9dc;
+    font-size: 11px;
+}
+
+/* Contenedor de las opciones de navegacion */
+.dashboard-page .sidebar-nav {
+    flex: 1;
+    padding: 22px 13px;
+}
+
+.dashboard-page .menu-label {
+    margin: 19px 10px 9px;
+    color: #91a8c1;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+}
+
+/* Enlaces del menu */
+.dashboard-page .menu-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-bottom: 5px;
+    padding: 12px;
+
+    border-radius: 8px;
+
+    color: #d9e4f0;
+    font-size: 13px;
+    text-decoration: none;
+
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.dashboard-page .menu-link > i {
+    width: 20px;
+    flex-shrink: 0;
+    font-size: 17px;
+    text-align: center;
+}
+
+/* Opcion actualmente seleccionada */
+.dashboard-page .menu-link.active {
+    background-color: var(--dashboard-accent);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Efecto visual al pasar el cursor */
+.dashboard-page a.menu-link:hover {
+    background-color: #21466d;
+    color: #ffffff;
+}
+
+/* Modulos que todavia no estan implementados */
+.dashboard-page .menu-disabled {
+    color: #a7b8cb;
+    cursor: default;
+    opacity: 0.75;
+}
+
+.dashboard-page .menu-disabled small {
+    margin-left: auto;
+    font-size: 9px;
+}
+
+/* Pie del menu lateral */
+.dashboard-page .sidebar-footer {
+    padding: 17px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+
+    color: #b9c9dc;
+    font-size: 10px;
+    text-align: center;
+}
+
+
+/* =========================================================
+   4. BARRA SUPERIOR
+   ========================================================= */
+
+.dashboard-page .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    min-height: 78px;
+    padding: 15px 32px;
+
+    background-color: #e8f0fa;
+    border-bottom: 1px solid #dce6f2;
+    box-shadow: 0 2px 8px rgba(20, 45, 75, 0.04);
+}
+
+/* Texto pequeno que identifica el panel */
+.dashboard-page .topbar-caption {
+    display: block;
+    margin-bottom: 5px;
+
+    color: #526b87;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+}
+
+.dashboard-page .topbar h6 {
+    margin: 0;
+    color: #1e2f45;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* Informacion del usuario */
+.dashboard-page .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dashboard-page .user-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    width: 39px;
+    height: 39px;
+
+    border-radius: 50%;
+    background-color: #dce9ff;
+    color: #1d4ed8;
+    font-size: 20px;
+}
+
+.dashboard-page .user-info strong,
+.dashboard-page .user-info small {
+    display: block;
+}
+
+.dashboard-page .user-info strong {
+    color: #26364b;
+    font-size: 12px;
+}
+
+.dashboard-page .user-info small {
+    margin-top: 3px;
+    color: #718096;
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   5. CONTENIDO PRINCIPAL
+   ========================================================= */
+
+.dashboard-page .dashboard-content {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 30px 28px;
+	flex: 1;
+}
+
+/* Separacion entre las secciones del dashboard */
+.dashboard-page .section-block {
+    margin-bottom: 30px;
+}
+
+/* Encabezados de las secciones */
+.dashboard-page .section-heading {
+    margin-bottom: 18px;
+}
+
+.dashboard-page .section-heading h5 {
+    margin-bottom: 6px;
+    color: #22354c;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.dashboard-page .section-heading p {
+    margin: 0;
+    color: var(--dashboard-muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   6. BIENVENIDA DEL DASHBOARD
+   ========================================================= */
+
+.dashboard-page .welcome-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+
+    margin-bottom: 30px;
+    padding: 24px 30px;
+
+    border: 1px solid #d8e5f5;
+    border-radius: 12px;
+
+    background: linear-gradient(110deg, #173b63, #24568b);
+    color: #ffffff;
+
+    box-shadow: 0 5px 16px rgba(18, 59, 104, 0.08);
+}
+
+.dashboard-page .welcome-label {
+    color: #c7ddff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+}
+
+.dashboard-page .welcome-section h1 {
+    margin: 8px 0;
+    color: #ffffff;
+    font-size: clamp(22px, 2vw, 27px);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.3;
+}
+
+.dashboard-page .welcome-section p {
+    margin: 0;
+    color: #e0ebfa;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+/* Icono decorativo de bienvenida */
+.dashboard-page .welcome-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    width: 66px;
+    height: 66px;
+
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 16px;
+
+    background-color: rgba(255, 255, 255, 0.09);
+    color: #ffffff;
+    font-size: 32px;
+}
+
+
+/* =========================================================
+   7. TARJETAS DE INDICADORES
+   Agencias, buses, viajes y ventas.
+   Los valores se encuentran en index.html por ahora.
+   ========================================================= */
+
+.dashboard-page .stat-card {
+    height: 100%;
+    min-height: 160px;
+    padding: 22px;
+
+    border: 1px solid var(--dashboard-border);
+    border-radius: 12px;
+
+    background-color: #ffffff;
+    box-shadow: 0 3px 12px rgba(26, 49, 79, 0.04);
+
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dashboard-page .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(26, 49, 79, 0.08);
+}
+
+/* Icono y nombre del indicador */
+.dashboard-page .stat-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    margin-bottom: 17px;
+}
+
+.dashboard-page .stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    width: 43px;
+    height: 43px;
+
+    border-radius: 11px;
+    font-size: 21px;
+}
+
+.dashboard-page .stat-blue {
+    background-color: #e5efff;
+    color: #2563eb;
+}
+
+.dashboard-page .stat-orange {
+    background-color: #fff0df;
+    color: #e87816;
+}
+
+.dashboard-page .stat-green {
+    background-color: #ddf8e9;
+    color: #159957;
+}
+
+.dashboard-page .stat-purple {
+    background-color: #eee7ff;
+    color: #7952c7;
+}
+
+.dashboard-page .stat-label {
+    color: #7b899a;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* Numero principal del indicador */
+.dashboard-page .stat-value {
+    margin: 0 0 9px;
+    color: #23364d;
+    font-size: 29px;
+    font-weight: 750;
+    line-height: 1.2;
+}
+
+/* Descripcion debajo del numero */
+.dashboard-page .stat-description {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    color: #718096;
+    font-size: 11px;
+}
+
+.dashboard-page .stat-description i {
+    color: #159957;
+}
+
+
+/* =========================================================
+   8. TARJETAS DE ACCESO A LOS MODULOS
+   ========================================================= */
+
+.dashboard-page .module-card {
+    display: block;
+    height: 100%;
+    min-height: 230px;
+    padding: 24px;
+
+    border: 1px solid #e6ebf2;
+    border-radius: 12px;
+
+    background-color: #ffffff;
+    color: inherit;
+    text-decoration: none;
+
+    box-shadow: 0 3px 12px rgba(26, 49, 79, 0.035);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* Efecto al pasar el cursor por un acceso habilitado */
+.dashboard-page a.module-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(26, 49, 79, 0.1);
+}
+
+/* Iconos de los modulos */
+.dashboard-page .module-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 48px;
+    height: 48px;
+    margin-bottom: 20px;
+
+    border-radius: 12px;
+    font-size: 23px;
+}
+
+.dashboard-page .icon-blue {
+    background-color: #e5efff;
+    color: #2563eb;
+}
+
+.dashboard-page .icon-orange {
+    background-color: #fff0df;
+    color: #e87816;
+}
+
+.dashboard-page .icon-green {
+    background-color: #ddf8e9;
+    color: #159957;
+}
+
+/* Titulos y descripciones de las tarjetas */
+.dashboard-page .module-card h6 {
+    margin-bottom: 10px;
+    color: #25374d;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.dashboard-page .module-card p {
+    min-height: 40px;
+    margin-bottom: 17px;
+
+    color: #718096;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+/* Enlace para ingresar al modulo */
+.dashboard-page .module-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* Apariencia de los modulos pendientes */
+.dashboard-page .module-card-disabled {
+    background-color: #fbfcfe;
+}
+
+.dashboard-page .module-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    color: #7c8999;
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   9. PANEL INFORMATIVO
+   ========================================================= */
+
+.dashboard-page .system-panel {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+
+    padding: 22px;
+
+    border: 1px solid #dbe8fa;
+    border-radius: 12px;
+
+    background-color: #edf5ff;
+}
+
+.dashboard-page .system-panel-icon {
+    flex-shrink: 0;
+    color: #2563eb;
+    font-size: 23px;
+}
+
+.dashboard-page .system-panel h6 {
+    margin-bottom: 7px;
+    color: #25456d;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.dashboard-page .system-panel p {
+    margin: 0;
+    color: #526b87;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+
+/* =========================================================
+   10. PIE DEL DASHBOARD
+   ========================================================= */
+
+.dashboard-page .dashboard-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: auto;
+	width: 100%;
+	flex-shrink:0;
+    padding-top: 20px;
+    border-top: 1px solid #e1e7ef;
+    color: #7b899a;
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   11. ADAPTACION PARA TABLETAS
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .dashboard-page .sidebar {
+        width: 220px;
+        min-width: 220px;
+    }
+
+    .dashboard-page .dashboard-content {
+        padding: 24px 20px;
+    }
+
+    .dashboard-page .topbar {
+        padding: 15px 22px;
+    }
+
+    .dashboard-page .welcome-section {
+        padding: 22px;
+    }
+
+    .dashboard-page .module-card {
+        padding: 20px;
+    }
+
+    .dashboard-page .stat-card {
+        padding: 18px;
+    }
+}
+
+
+/* =========================================================
+   12. ADAPTACION PARA CELULARES
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    /* El menu se coloca encima del contenido */
+    .dashboard-page .dashboard-layout {
+        flex-direction: column;
+    }
+
+    .dashboard-page .sidebar {
+        width: 100%;
+        min-width: 0;
+        min-height: auto;
+    }
+
+    .dashboard-page .sidebar-brand {
+        padding: 15px 20px;
+    }
+
+    .dashboard-page .sidebar-nav {
+        padding: 10px 13px;
+    }
+
+    .dashboard-page .sidebar-footer {
+        display: none;
+    }
+
+    /* Barra superior */
+    .dashboard-page .topbar {
+        min-height: 68px;
+        padding: 14px 18px;
+    }
+
+    .dashboard-page .user-info,
+    .dashboard-page .user-profile > .bi-chevron-down {
+        display: none;
+    }
+
+    /* Area principal */
+    .dashboard-page .dashboard-content {
+        padding: 18px;
+    }
+
+    /* Bienvenida */
+    .dashboard-page .welcome-section {
+        gap: 14px;
+        padding: 20px;
+    }
+
+    .dashboard-page .welcome-section h1 {
+        font-size: 22px;
+    }
+
+    .dashboard-page .welcome-section p {
+        font-size: 12px;
+    }
+
+    .dashboard-page .welcome-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        font-size: 25px;
+    }
+
+    /* Indicadores */
+    .dashboard-page .stat-card {
+        min-height: 145px;
+        padding: 18px;
+    }
+
+    .dashboard-page .stat-value {
+        font-size: 26px;
+    }
+
+    /* Tarjetas y panel informativo */
+    .dashboard-page .module-card {
+        min-height: 200px;
+    }
+
+    .dashboard-page .system-panel {
+        padding: 18px;
+    }
+
+    /* Pie de pagina */
+    .dashboard-page .dashboard-footer {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+
+/* Ancho de las cajas de busqueda de los listados */
+.caja-busqueda {
+    max-width: 350px;
+}
+
+/* El perfil del usuario abre el menu "Cerrar sesion" */
+.dashboard-page .user-profile {
+    cursor: pointer;
+}
+

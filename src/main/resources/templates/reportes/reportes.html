@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Reportes')}">
+    <meta charset="UTF-8">
+    <title>Reportes</title>
+</head>
+<body th:replace="~{layout :: panel('reportes', ~{::contenido})}">
+    <div th:fragment="contenido">
+        <div class="container-fluid py-4">
+
+            <div class="mb-4">
+                <h2 class="fw-bold mb-1">
+                    <i class="bi bi-bar-chart-line"></i>
+                    Módulo de Reportes
+                </h2>
+            </div>
+
+            <div th:if="${param.periodo}" class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                Periodo inválido: la fecha final no puede ser menor que la fecha inicial.
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Ventas por periodo</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label for="ventasInicio" class="form-label fw-semibold">Desde</label>
+                                    <input type="date" id="ventasInicio" class="form-control">
+                                </div>
+                                <div class="col-6">
+                                    <label for="ventasFin" class="form-label fw-semibold">Hasta</label>
+                                    <input type="date" id="ventasFin" class="form-control">
+                                </div>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" class="btn btn-danger" onclick="reportePeriodo('ventas', 'pdf')">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> Generar PDF
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="reportePeriodo('ventas', 'excel')">
+                                    <i class="bi bi-file-earmark-excel me-1"></i> Exportar a Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0"><i class="bi bi-arrow-left-right me-2"></i>Movimientos de inventario</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label for="movimientosInicio" class="form-label fw-semibold">Desde</label>
+                                    <input type="date" id="movimientosInicio" class="form-control">
+                                </div>
+                                <div class="col-6">
+                                    <label for="movimientosFin" class="form-label fw-semibold">Hasta</label>
+                                    <input type="date" id="movimientosFin" class="form-control">
+                                </div>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" class="btn btn-danger" onclick="reportePeriodo('movimientos', 'pdf')">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> Generar PDF
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="reportePeriodo('movimientos', 'excel')">
+                                    <i class="bi bi-file-earmark-excel me-1"></i> Exportar a Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0"><i class="bi bi-box-seam me-2"></i>Inventario de productos</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap gap-2">
+                                <a th:href="@{/reportes/inventario/pdf}" class="btn btn-danger" target="_blank">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> Generar PDF
+                                </a>
+                                <a th:href="@{/reportes/inventario/excel}" class="btn btn-success">
+                                    <i class="bi bi-file-earmark-excel me-1"></i> Exportar a Excel
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Productos con stock bajo</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap gap-2">
+                                <a th:href="@{/reportes/stockbajo/pdf}" class="btn btn-danger" target="_blank">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> Generar PDF
+                                </a>
+                                <a th:href="@{/reportes/stockbajo/excel}" class="btn btn-success">
+                                    <i class="bi bi-file-earmark-excel me-1"></i> Exportar a Excel
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            (function () {
+                const hoy = new Date();
+                const primero = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+                const formato = function (f) {
+                    return f.getFullYear() + "-" + String(f.getMonth() + 1).padStart(2, "0") + "-" +
+                           String(f.getDate()).padStart(2, "0");
+                };
+                ["ventas", "movimientos"].forEach(function (r) {
+                    document.getElementById(r + "Inicio").value = formato(primero);
+                    document.getElementById(r + "Fin").value = formato(hoy);
+                });
+            })();
+
+            // abrir el reporte con el periodo elegido
+            function reportePeriodo(reporte, formato) {
+                const inicio = document.getElementById(reporte + "Inicio").value;
+                const fin = document.getElementById(reporte + "Fin").value;
+                if (!inicio || !fin) {
+                    Swal.fire({ icon: "warning", title: "Indique el periodo", text: "Seleccione ambas fechas." });
+                    return;
+                }
+                if (fin < inicio) {
+                    Swal.fire({ icon: "warning", title: "Periodo inválido",
+                                text: "La fecha final no puede ser menor que la fecha inicial." });
+                    return;
+                }
+                const url = "/reportes/" + reporte + "/" + formato +
+                            "?fechaInicio=" + inicio + "&fechaFin=" + fin;
+                window.open(url, "_blank");
+            }
+        </script>
+    </div>
+</body>
+</html>

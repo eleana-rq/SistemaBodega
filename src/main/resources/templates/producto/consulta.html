@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Consultar Productos')}">
+    <title>Consultar Productos</title>
+</head>
+<body th:replace="~{layout :: panel('consulta', ~{::contenido})}">
+<div th:fragment="contenido">
+    <div class="container-fluid py-4">
+
+        <div class="mb-4">
+            <h2 class="fw-bold mb-1"><i class="bi bi-search"></i> Consultar Productos</h2>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <form th:action="@{/consultaproductos}" method="get" class="row g-2 align-items-end">
+                    <div class="col-md-8">
+                        <label for="criterio" class="form-label fw-semibold">Criterio de búsqueda</label>
+                        <input type="text" id="criterio" name="criterio" class="form-control"
+                               th:value="${criterio}">
+                    </div>
+                    <div class="col-md-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                        <a th:href="@{/consultaproductos}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg"></i> Limpiar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(listaproductos)}" class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle me-1"></i> No se encontraron productos.
+                </div>
+                <div class="w-100 overflow-hidden" th:unless="${#lists.isEmpty(listaproductos)}">
+                    <table id="tabla" class="table table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th class="text-end">Precio</th>
+                                <th class="text-center">Stock</th>
+                                <th>Estado</th>
+                                <th class="text-center">Detalle</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="p : ${listaproductos}" th:classappend="${p.estado == 0} ? 'table-secondary' : ''">
+                                <td th:text="${p.codigo}"></td>
+                                <td th:text="${p.nombre}"></td>
+                                <td th:text="${p.categoria.nombre}"></td>
+                                <td class="text-end" th:text="'S/ ' + ${#numbers.formatDecimal(p.precioVenta, 1, 2, 'POINT')}"></td>
+                                <td class="text-center fw-semibold" th:text="${p.stock}"></td>
+                                <td>
+                                    <span th:if="${p.estado == 0}" class="badge bg-secondary">Inactivo - no se vende</span>
+                                    <span th:if="${p.estado == 1 and p.stock == 0}" class="badge bg-danger">Agotado</span>
+                                    <span th:if="${p.estado == 1 and p.stock > 0 and p.stockBajo}" class="badge bg-warning text-dark">Stock bajo</span>
+                                    <span th:if="${p.estado == 1 and !p.stockBajo}" class="badge bg-success">Disponible</span>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-info btn-sm text-white" title="Ver detalle"
+                                            th:data-codigo="${p.codigo}"
+                                            th:data-nombre="${p.nombre}"
+                                            th:data-categoria="${p.categoria.nombre}"
+                                            th:data-precio="${#numbers.formatDecimal(p.precioVenta, 1, 2, 'POINT')}"
+                                            th:data-stock="${p.stock}"
+                                            th:data-minimo="${p.stockMinimo}"
+                                            th:data-estado="${p.estado == 1 ? 'Activo' : 'Inactivo'}"
+                                            onclick="verDetalle(this)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalDetalle" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-box-seam"></i> Detalle del producto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <dl class="row mb-0">
+                        <dt class="col-5">Código</dt><dd class="col-7" id="dCodigo"></dd>
+                        <dt class="col-5">Nombre</dt><dd class="col-7" id="dNombre"></dd>
+                        <dt class="col-5">Categoría</dt><dd class="col-7" id="dCategoria"></dd>
+                        <dt class="col-5">Precio de venta</dt><dd class="col-7" id="dPrecio"></dd>
+                        <dt class="col-5">Stock disponible</dt><dd class="col-7" id="dStock"></dd>
+                        <dt class="col-5">Stock mínimo</dt><dd class="col-7" id="dMinimo"></dd>
+                        <dt class="col-5">Estado</dt><dd class="col-7" id="dEstado"></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if (document.getElementById("tabla")) {
+            crearTabla("#tabla", "productos");
+        }
+
+        const modalDetalle = new bootstrap.Modal(document.getElementById("modalDetalle"));
+
+        // mostrar detalle del producto
+        function verDetalle(boton) {
+            const d = boton.dataset;
+            document.getElementById("dCodigo").textContent = d.codigo;
+            document.getElementById("dNombre").textContent = d.nombre;
+            document.getElementById("dCategoria").textContent = d.categoria;
+            document.getElementById("dPrecio").textContent = "S/ " + d.precio;
+            document.getElementById("dStock").textContent = d.stock + " unidades";
+            document.getElementById("dMinimo").textContent = d.minimo + " unidades";
+            document.getElementById("dEstado").textContent = d.estado;
+            modalDetalle.show();
+        }
+    </script>
+</div>
+</body>
+</html>

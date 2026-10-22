@@ -1,0 +1,106 @@
+<jasperReport name="MovimientosInventario" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" whenNoDataType="AllSectionsNoDetail">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="miConexion"/>
+	<parameter name="fechaInicio" class="java.lang.String"/>
+	<parameter name="fechaFin" class="java.lang.String"/>
+	<query language="sql"><![CDATA[SELECT
+    m.fecha,
+    m.tipo,
+    p.nombre AS producto,
+    m.cantidad,
+    m.stock_anterior,
+    m.stock_resultante,
+    u.usuario
+FROM tb_movimiento m
+INNER JOIN tb_producto p
+    ON m.id_producto = p.id_producto
+INNER JOIN tb_usuario u
+    ON m.id_usuario = u.id_usuario
+WHERE DATE(m.fecha) BETWEEN $P{fechaInicio} AND $P{fechaFin}
+ORDER BY m.fecha]]></query>
+	<field name="fecha" class="java.sql.Timestamp"/>
+	<field name="tipo" class="java.lang.String"/>
+	<field name="producto" class="java.lang.String"/>
+	<field name="cantidad" class="java.lang.Integer"/>
+	<field name="stock_anterior" class="java.lang.Integer"/>
+	<field name="stock_resultante" class="java.lang.Integer"/>
+	<field name="usuario" class="java.lang.String"/>
+	<variable name="cantidadMovimientos" class="java.lang.Integer" calculation="Count">
+		<expression><![CDATA[$F{tipo}]]></expression>
+	</variable>
+	<background splitType="Stretch"/>
+	<title height="40" splitType="Stretch">
+		<element kind="staticText" x="0" y="5" width="555" height="30" fontSize="16.0" bold="true">
+			<text><![CDATA[MOVIMIENTOS DE INVENTARIO]]></text>
+		</element>
+	</title>
+	<pageHeader height="30" splitType="Stretch">
+		<element kind="staticText" x="0" y="5" width="50" height="20" bold="true">
+			<text><![CDATA[Desde:]]></text>
+		</element>
+		<element kind="textField" x="50" y="5" width="100" height="20">
+			<expression><![CDATA[$P{fechaInicio}]]></expression>
+		</element>
+		<element kind="staticText" x="170" y="5" width="50" height="20" bold="true">
+			<text><![CDATA[Hasta:]]></text>
+		</element>
+		<element kind="textField" x="220" y="5" width="100" height="20">
+			<expression><![CDATA[$P{fechaFin}]]></expression>
+		</element>
+	</pageHeader>
+	<columnHeader height="25" splitType="Stretch">
+		<element kind="staticText" x="0" y="5" width="105" height="20" bold="true">
+			<text><![CDATA[Fecha]]></text>
+		</element>
+		<element kind="staticText" x="105" y="5" width="75" height="20" bold="true">
+			<text><![CDATA[Tipo]]></text>
+		</element>
+		<element kind="staticText" x="180" y="5" width="150" height="20" bold="true">
+			<text><![CDATA[Producto]]></text>
+		</element>
+		<element kind="staticText" x="330" y="5" width="45" height="20" bold="true">
+			<text><![CDATA[Cant.]]></text>
+		</element>
+		<element kind="staticText" x="375" y="5" width="60" height="20" bold="true">
+			<text><![CDATA[Antes]]></text>
+		</element>
+		<element kind="staticText" x="435" y="5" width="55" height="20" bold="true">
+			<text><![CDATA[Después]]></text>
+		</element>
+		<element kind="staticText" x="490" y="5" width="65" height="20" bold="true">
+			<text><![CDATA[Usuario]]></text>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<element kind="textField" x="0" y="2" width="105" height="20" pattern="dd/MM/yyyy HH:mm">
+				<expression><![CDATA[$F{fecha}]]></expression>
+			</element>
+			<element kind="textField" x="105" y="2" width="75" height="20">
+				<expression><![CDATA[$F{tipo}]]></expression>
+			</element>
+			<element kind="textField" x="180" y="2" width="150" height="20">
+				<expression><![CDATA[$F{producto}]]></expression>
+			</element>
+			<element kind="textField" x="330" y="2" width="45" height="20">
+				<expression><![CDATA[$F{cantidad}]]></expression>
+			</element>
+			<element kind="textField" x="375" y="2" width="60" height="20">
+				<expression><![CDATA[$F{stock_anterior}]]></expression>
+			</element>
+			<element kind="textField" x="435" y="2" width="55" height="20">
+				<expression><![CDATA[$F{stock_resultante}]]></expression>
+			</element>
+			<element kind="textField" x="490" y="2" width="65" height="20">
+				<expression><![CDATA[$F{usuario}]]></expression>
+			</element>
+		</band>
+	</detail>
+	<summary height="40" splitType="Stretch">
+		<element kind="staticText" x="180" y="10" width="150" height="20" bold="true">
+			<text><![CDATA[TOTAL DE MOVIMIENTOS:]]></text>
+		</element>
+		<element kind="textField" x="330" y="10" width="45" height="20" bold="true">
+			<expression><![CDATA[$V{cantidadMovimientos}]]></expression>
+		</element>
+	</summary>
+</jasperReport>

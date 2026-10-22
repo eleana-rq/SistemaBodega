@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Usuarios')}">
+    <title>Usuarios</title>
+</head>
+<body th:replace="~{layout :: panel('usuarios', ~{::contenido})}">
+<div th:fragment="contenido">
+    <div class="container-fluid py-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1"><i class="bi bi-people"></i> Gestión de Usuarios</h2>
+            </div>
+            <button type="button" class="btn btn-primary" id="btnNuevo">
+                <i class="bi bi-person-plus"></i> Nuevo Usuario
+            </button>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="buscar" class="form-label fw-semibold">Buscar usuario</label>
+                        <div class="input-group caja-busqueda">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" id="buscar" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="w-100 overflow-hidden">
+                    <table id="tabla" class="table table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombres y apellidos</th>
+                                <th>Usuario</th>
+                                <th>Correo</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="u : ${listausuarios}">
+                                <td th:text="${u.idUsuario}"></td>
+                                <td th:text="${u.nombreCompleto}"></td>
+                                <td th:text="${u.usuario}"></td>
+                                <td th:text="${u.correo}"></td>
+                                <td><span class="badge bg-primary-subtle text-primary-emphasis" th:text="${u.rol.nombre}"></span></td>
+                                <td>
+                                    <span th:if="${u.estado == 1}" class="badge bg-success">Activo</span>
+                                    <span th:if="${u.estado == 0}" class="badge bg-secondary">Inactivo</span>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-warning btn-sm" title="Editar"
+                                            th:data-id="${u.idUsuario}"
+                                            th:data-nombres="${u.nombres}"
+                                            th:data-apellidos="${u.apellidos}"
+                                            th:data-usuario="${u.usuario}"
+                                            th:data-correo="${u.correo}"
+                                            th:data-rol="${u.rol.idRol}"
+                                            onclick="editar(this)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm"
+                                            th:unless="${u.idUsuario == usuarioSesion.idUsuario}"
+                                            th:classappend="${u.estado == 1} ? 'btn-danger' : 'btn-success'"
+                                            th:title="${u.estado == 1} ? 'Inactivar' : 'Activar'"
+                                            th:data-id="${u.idUsuario}"
+                                            th:data-nombre="${u.usuario}"
+                                            th:data-estado="${u.estado}"
+                                            onclick="cambiarEstado(this)">
+                                        <i class="bi" th:classappend="${u.estado == 1} ? 'bi-person-slash' : 'bi-person-check'"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalForm" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="tituloModal"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formulario" th:action="@{/registrarusuario}" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="idUsuario" name="idUsuario">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="nombres" class="form-label fw-semibold">Nombres</label>
+                                <input type="text" id="nombres" name="nombres" class="form-control" maxlength="80" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="apellidos" class="form-label fw-semibold">Apellidos</label>
+                                <input type="text" id="apellidos" name="apellidos" class="form-control" maxlength="80" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="usuario" class="form-label fw-semibold">Usuario</label>
+                                <input type="text" id="usuario" name="usuario" class="form-control" maxlength="30" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="clave" class="form-label fw-semibold">Contraseña</label>
+                                <input type="password" id="clave" name="clave" class="form-control" maxlength="50">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="correo" class="form-label fw-semibold">Correo</label>
+                                <input type="email" id="correo" name="correo" class="form-control" maxlength="100">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="rol" class="form-label fw-semibold">Rol</label>
+                                <select id="rol" name="rol.idRol" class="form-select" required>
+                                    <option value="">Seleccione un rol</option>
+                                    <option th:each="r : ${listaroles}" th:value="${r.idRol}" th:text="${r.nombre}"></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="btnGuardar"></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <form id="formEstado" th:action="@{/estadousuario}" method="post">
+        <input type="hidden" id="idEstado" name="id">
+    </form>
+
+    <script>
+        const tabla = crearTabla("#tabla", "usuarios");
+        conectarBuscador("buscar", tabla);
+
+        const formulario = document.getElementById("formulario");
+        const clave = document.getElementById("clave");
+        const modal = new bootstrap.Modal(document.getElementById("modalForm"));
+
+        // nuevo registro
+        document.getElementById("btnNuevo").addEventListener("click", function () {
+            document.getElementById("tituloModal").innerHTML = '<i class="bi bi-person-plus"></i> Registrar Usuario';
+            formulario.action = "/registrarusuario";
+            formulario.reset();
+            document.getElementById("idUsuario").value = "";
+            clave.required = true;
+            document.getElementById("btnGuardar").innerHTML = '<i class="bi bi-save"></i> Guardar';
+            modal.show();
+        });
+
+        // cargar los datos en el formulario para editar
+        function editar(boton) {
+            const d = boton.dataset;
+            formulario.reset();
+            document.getElementById("idUsuario").value = d.id;
+            document.getElementById("nombres").value = d.nombres;
+            document.getElementById("apellidos").value = d.apellidos;
+            document.getElementById("usuario").value = d.usuario;
+            document.getElementById("correo").value = d.correo || "";
+            document.getElementById("rol").value = d.rol;
+            clave.required = false;
+            document.getElementById("tituloModal").innerHTML = '<i class="bi bi-pencil-square"></i> Editar Usuario';
+            formulario.action = "/actualizarusuario";
+            document.getElementById("btnGuardar").innerHTML = '<i class="bi bi-save"></i> Actualizar';
+            modal.show();
+        }
+
+        // activar o inactivar
+        function cambiarEstado(boton) {
+            const accion = boton.dataset.estado === "1" ? "inactivar" : "activar";
+            document.getElementById("idEstado").value = boton.dataset.id;
+            confirmarEnvio("formEstado", "¿Desea " + accion + " al usuario?", boton.dataset.nombre,
+                           "Sí, " + accion);
+        }
+    </script>
+</div>
+</body>
+</html>

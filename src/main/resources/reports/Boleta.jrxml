@@ -1,0 +1,89 @@
+<jasperReport name="Boleta" language="java" pageWidth="420" pageHeight="595" columnWidth="380" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="miConexion"/>
+	<parameter name="idVenta" class="java.lang.Integer"/>
+	<query language="sql"><![CDATA[SELECT
+    v.nro_boleta,
+    v.fecha,
+    u.usuario AS cajero,
+    v.total,
+    p.nombre AS producto,
+    d.cantidad,
+    d.precio_unitario,
+    d.subtotal
+FROM tb_venta v
+INNER JOIN tb_usuario u
+    ON v.id_usuario = u.id_usuario
+INNER JOIN tb_detalle_venta d
+    ON d.id_venta = v.id_venta
+INNER JOIN tb_producto p
+    ON d.id_producto = p.id_producto
+WHERE v.id_venta = $P{idVenta}
+ORDER BY d.id_detalle]]></query>
+	<field name="nro_boleta" class="java.lang.String"/>
+	<field name="fecha" class="java.sql.Timestamp"/>
+	<field name="cajero" class="java.lang.String"/>
+	<field name="total" class="java.math.BigDecimal"/>
+	<field name="producto" class="java.lang.String"/>
+	<field name="cantidad" class="java.lang.Integer"/>
+	<field name="precio_unitario" class="java.math.BigDecimal"/>
+	<field name="subtotal" class="java.math.BigDecimal"/>
+	<background splitType="Stretch"/>
+	<title height="90" splitType="Stretch">
+		<element kind="staticText" x="0" y="5" width="380" height="30" fontSize="16.0" bold="true" hTextAlign="Center">
+			<text><![CDATA[BOLETA DE VENTA]]></text>
+		</element>
+		<element kind="textField" x="0" y="35" width="380" height="20" bold="true" hTextAlign="Center">
+			<expression><![CDATA[$F{nro_boleta}]]></expression>
+		</element>
+		<element kind="staticText" x="0" y="62" width="50" height="20" bold="true">
+			<text><![CDATA[Fecha:]]></text>
+		</element>
+		<element kind="textField" x="50" y="62" width="130" height="20" pattern="dd/MM/yyyy HH:mm">
+			<expression><![CDATA[$F{fecha}]]></expression>
+		</element>
+		<element kind="staticText" x="200" y="62" width="50" height="20" bold="true">
+			<text><![CDATA[Cajero:]]></text>
+		</element>
+		<element kind="textField" x="250" y="62" width="130" height="20">
+			<expression><![CDATA[$F{cajero}]]></expression>
+		</element>
+	</title>
+	<columnHeader height="25" splitType="Stretch">
+		<element kind="staticText" x="0" y="5" width="45" height="20" bold="true">
+			<text><![CDATA[Cant.]]></text>
+		</element>
+		<element kind="staticText" x="45" y="5" width="195" height="20" bold="true">
+			<text><![CDATA[Producto]]></text>
+		</element>
+		<element kind="staticText" x="240" y="5" width="70" height="20" bold="true">
+			<text><![CDATA[P. Unit.]]></text>
+		</element>
+		<element kind="staticText" x="310" y="5" width="70" height="20" bold="true">
+			<text><![CDATA[Importe]]></text>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<element kind="textField" x="0" y="2" width="45" height="20">
+				<expression><![CDATA[$F{cantidad}]]></expression>
+			</element>
+			<element kind="textField" x="45" y="2" width="195" height="20">
+				<expression><![CDATA[$F{producto}]]></expression>
+			</element>
+			<element kind="textField" x="240" y="2" width="70" height="20" pattern="#,##0.00">
+				<expression><![CDATA[$F{precio_unitario}]]></expression>
+			</element>
+			<element kind="textField" x="310" y="2" width="70" height="20" pattern="#,##0.00">
+				<expression><![CDATA[$F{subtotal}]]></expression>
+			</element>
+		</band>
+	</detail>
+	<summary height="40" splitType="Stretch">
+		<element kind="staticText" x="200" y="10" width="110" height="20" bold="true">
+			<text><![CDATA[TOTAL S/]]></text>
+		</element>
+		<element kind="textField" x="310" y="10" width="70" height="20" bold="true" pattern="#,##0.00">
+			<expression><![CDATA[$F{total}]]></expression>
+		</element>
+	</summary>
+</jasperReport>

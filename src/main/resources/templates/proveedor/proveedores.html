@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Proveedores')}">
+    <title>Proveedores</title>
+</head>
+<body th:replace="~{layout :: panel('proveedores', ~{::contenido})}">
+<div th:fragment="contenido">
+    <div class="container-fluid py-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1"><i class="bi bi-truck"></i> Gestión de Proveedores</h2>
+            </div>
+            <button type="button" class="btn btn-primary" id="btnNuevo">
+                <i class="bi bi-plus-circle"></i> Nuevo Proveedor
+            </button>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="buscar" class="form-label fw-semibold">Buscar proveedor</label>
+                        <div class="input-group caja-busqueda">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" id="buscar" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="w-100 overflow-hidden">
+                    <table id="tabla" class="table table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>RUC</th>
+                                <th>Razón social</th>
+                                <th>Contacto</th>
+                                <th>Teléfono</th>
+                                <th>Correo</th>
+                                <th>Estado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="p : ${listaproveedores}">
+                                <td th:text="${p.ruc}"></td>
+                                <td th:text="${p.razonSocial}"></td>
+                                <td th:text="${p.contacto}"></td>
+                                <td th:text="${p.telefono}"></td>
+                                <td th:text="${p.correo}"></td>
+                                <td>
+                                    <span th:if="${p.estado == 1}" class="badge bg-success">Activo</span>
+                                    <span th:if="${p.estado == 0}" class="badge bg-secondary">Inactivo</span>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-warning btn-sm" title="Editar"
+                                            th:data-id="${p.idProveedor}"
+                                            th:data-ruc="${p.ruc}"
+                                            th:data-razon="${p.razonSocial}"
+                                            th:data-contacto="${p.contacto}"
+                                            th:data-telefono="${p.telefono}"
+                                            th:data-correo="${p.correo}"
+                                            th:data-direccion="${p.direccion}"
+                                            th:data-estado="${p.estado}"
+                                            onclick="editar(this)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm"
+                                            th:classappend="${p.estado == 1} ? 'btn-danger' : 'btn-success'"
+                                            th:title="${p.estado == 1} ? 'Inactivar' : 'Activar'"
+                                            th:data-id="${p.idProveedor}"
+                                            th:data-nombre="${p.razonSocial}"
+                                            th:data-estado="${p.estado}"
+                                            onclick="cambiarEstado(this)">
+                                        <i class="bi" th:classappend="${p.estado == 1} ? 'bi-slash-circle' : 'bi-check-circle'"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalForm" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="tituloModal"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formulario" th:action="@{/registrarproveedor}" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="idProveedor" name="idProveedor">
+                        <input type="hidden" id="estado" name="estado" value="1">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="ruc" class="form-label fw-semibold">RUC</label>
+                                <input type="text" id="ruc" name="ruc" class="form-control" maxlength="11"
+                                       pattern="\d{11}" required>
+                            </div>
+                            <div class="col-md-8">
+                                <label for="razonSocial" class="form-label fw-semibold">Razón social</label>
+                                <input type="text" id="razonSocial" name="razonSocial" class="form-control" maxlength="120" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="contacto" class="form-label fw-semibold">Contacto</label>
+                                <input type="text" id="contacto" name="contacto" class="form-control" maxlength="80">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="telefono" class="form-label fw-semibold">Teléfono</label>
+                                <input type="text" id="telefono" name="telefono" class="form-control" maxlength="20">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="correo" class="form-label fw-semibold">Correo</label>
+                                <input type="email" id="correo" name="correo" class="form-control" maxlength="100">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="direccion" class="form-label fw-semibold">Dirección</label>
+                                <input type="text" id="direccion" name="direccion" class="form-control" maxlength="150">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="btnGuardar"></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <form id="formEstado" th:action="@{/estadoproveedor}" method="post">
+        <input type="hidden" id="idEstado" name="id">
+    </form>
+
+    <script>
+        const tabla = crearTabla("#tabla", "proveedores");
+        conectarBuscador("buscar", tabla);
+
+        const formulario = document.getElementById("formulario");
+        const modal = new bootstrap.Modal(document.getElementById("modalForm"));
+
+        // nuevo registro
+        document.getElementById("btnNuevo").addEventListener("click", function () {
+            document.getElementById("tituloModal").innerHTML = '<i class="bi bi-truck"></i> Registrar Proveedor';
+            formulario.action = "/registrarproveedor";
+            formulario.reset();
+            document.getElementById("idProveedor").value = "";
+            document.getElementById("estado").value = "1";
+            document.getElementById("btnGuardar").innerHTML = '<i class="bi bi-save"></i> Guardar';
+            modal.show();
+        });
+
+        // cargar los datos en el formulario para editar
+        function editar(boton) {
+            const d = boton.dataset;
+            document.getElementById("idProveedor").value = d.id;
+            document.getElementById("ruc").value = d.ruc;
+            document.getElementById("razonSocial").value = d.razon;
+            document.getElementById("contacto").value = d.contacto || "";
+            document.getElementById("telefono").value = d.telefono || "";
+            document.getElementById("correo").value = d.correo || "";
+            document.getElementById("direccion").value = d.direccion || "";
+            document.getElementById("estado").value = d.estado;
+            document.getElementById("tituloModal").innerHTML = '<i class="bi bi-pencil-square"></i> Editar Proveedor';
+            formulario.action = "/actualizarproveedor";
+            document.getElementById("btnGuardar").innerHTML = '<i class="bi bi-save"></i> Actualizar';
+            modal.show();
+        }
+
+        // activar o inactivar
+        function cambiarEstado(boton) {
+            const accion = boton.dataset.estado === "1" ? "inactivar" : "activar";
+            document.getElementById("idEstado").value = boton.dataset.id;
+            confirmarEnvio("formEstado", "¿Desea " + accion + " el proveedor?", boton.dataset.nombre,
+                           "Sí, " + accion);
+        }
+    </script>
+</div>
+</body>
+</html>

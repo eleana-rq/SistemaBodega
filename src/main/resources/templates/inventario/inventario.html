@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Inventario')}">
+    <title>Inventario</title>
+</head>
+<body th:replace="~{layout :: panel('inventario', ~{::contenido})}">
+<div th:fragment="contenido">
+    <div class="container-fluid py-4">
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+            <div>
+                <h2 class="fw-bold mb-1"><i class="bi bi-arrow-left-right"></i> Gestionar Inventario</h2>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalIngreso">
+                    <i class="bi bi-box-arrow-in-down"></i> Ingreso de mercadería
+                </button>
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalSalida">
+                    <i class="bi bi-box-arrow-up"></i> Salida / Ajuste
+                </button>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="buscar" class="form-label fw-semibold">Buscar movimiento</label>
+                        <div class="input-group caja-busqueda">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" id="buscar" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="w-100 overflow-auto">
+                    <table id="tabla" class="table table-hover table-sm align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th>Producto</th>
+                                <th class="text-center">Cantidad</th>
+                                <th class="text-center">Stock ant.</th>
+                                <th class="text-center">Stock final</th>
+                                <th>Proveedor / Documento</th>
+                                <th>Motivo</th>
+                                <th>Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="m : ${listamovimientos}">
+                                <td th:text="${#temporals.format(m.fecha, 'dd/MM/yyyy HH:mm')}"
+                                    th:data-order="${#temporals.format(m.fecha, 'yyyyMMddHHmmss')}"></td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${m.tipo == 'INGRESO' or m.tipo == 'ANULACION'} ? 'bg-success'
+                                                        : (${m.tipo == 'VENTA'} ? 'bg-primary'
+                                                        : (${m.tipo == 'AJUSTE'} ? 'bg-info text-dark' : 'bg-danger'))"
+                                          th:text="${m.tipo}"></span>
+                                </td>
+                                <td th:text="${m.producto.nombre}"></td>
+                                <td class="text-center fw-semibold"
+                                    th:classappend="${m.cantidad > 0} ? 'text-success' : 'text-danger'"
+                                    th:text="${m.cantidad > 0 ? '+' + m.cantidad : m.cantidad}"></td>
+                                <td class="text-center" th:text="${m.stockAnterior}"></td>
+                                <td class="text-center" th:text="${m.stockResultante}"></td>
+                                <td>
+                                    <span th:if="${m.proveedor != null}" th:text="${m.proveedor.razonSocial}"></span>
+                                    <small class="text-muted d-block" th:text="${m.documento}"></small>
+                                </td>
+                                <td th:text="${m.motivo}"></td>
+                                <td th:text="${m.usuario.usuario}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalIngreso" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-box-arrow-in-down"></i> Registrar ingreso de mercadería</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/registraringreso}" method="post">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-7">
+                                <label for="ingProveedor" class="form-label fw-semibold">Proveedor</label>
+                                <select id="ingProveedor" name="idProveedor" class="form-select" required>
+                                    <option value="">Seleccione un proveedor</option>
+                                    <option th:each="pv : ${listaproveedores}" th:value="${pv.idProveedor}"
+                                            th:text="${pv.razonSocial} + ' - ' + ${pv.ruc}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-5">
+                                <label for="ingDocumento" class="form-label fw-semibold">Documento sustento</label>
+                                <input type="text" id="ingDocumento" name="documento" class="form-control"
+                                       maxlength="30" required>
+                            </div>
+                            <div class="col-md-8">
+                                <label for="ingProducto" class="form-label fw-semibold">Producto</label>
+                                <select id="ingProducto" name="idProducto" class="form-select" required>
+                                    <option value="">Seleccione un producto</option>
+                                    <option th:each="p : ${listaproductos}" th:value="${p.idProducto}"
+                                            th:text="${p.codigo} + ' - ' + ${p.nombre} + ' (stock: ' + ${p.stock} + ')'"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="ingCantidad" class="form-label fw-semibold">Cantidad</label>
+                                <input type="number" id="ingCantidad" name="cantidad" class="form-control" min="1" step="1" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-save"></i> Registrar ingreso
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalSalida" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-box-arrow-up"></i> Registrar salida o ajuste de stock</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/registrarsalida}" method="post">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="salTipo" class="form-label fw-semibold">Tipo</label>
+                                <select id="salTipo" name="tipo" class="form-select" onchange="cambiarTipo()">
+                                    <option value="SALIDA">Salida</option>
+                                    <option value="AJUSTE">Ajuste por conteo</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <label for="salProducto" class="form-label fw-semibold">Producto</label>
+                                <select id="salProducto" name="idProducto" class="form-select" required>
+                                    <option value="">Seleccione un producto</option>
+                                    <option th:each="p : ${listaproductos}" th:value="${p.idProducto}"
+                                            th:text="${p.codigo} + ' - ' + ${p.nombre} + ' (stock: ' + ${p.stock} + ')'"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="salCantidad" class="form-label fw-semibold" id="lblCantidad">Cantidad que sale</label>
+                                <input type="number" id="salCantidad" name="cantidad" class="form-control" min="0" step="1" required>
+                            </div>
+                            <div class="col-md-8">
+                                <label for="salMotivo" class="form-label fw-semibold">Motivo</label>
+                                <input type="text" id="salMotivo" name="motivo" class="form-control" maxlength="150" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-save"></i> Registrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tabla = crearTabla("#tabla", "movimientos", { order: [] });
+        conectarBuscador("buscar", tabla);
+
+        // cambiar las etiquetas segun salida o ajuste
+        function cambiarTipo() {
+            const ajuste = document.getElementById("salTipo").value === "AJUSTE";
+            document.getElementById("lblCantidad").textContent = ajuste ? "Stock físico contado" : "Cantidad que sale";
+        }
+    </script>
+</div>
+</body>
+</html>

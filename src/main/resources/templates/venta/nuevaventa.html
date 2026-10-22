@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Registrar Venta')}">
+    <title>Registrar Venta</title>
+</head>
+<body th:replace="~{layout :: panel('nuevaventa', ~{::contenido})}">
+<div th:fragment="contenido">
+    <div class="container-fluid py-4">
+
+        <div class="mb-4">
+            <h2 class="fw-bold mb-1"><i class="bi bi-cart-plus"></i> Registrar Venta</h2>
+        </div>
+
+        <div th:if="${idBoleta}" class="alert alert-success d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-check-circle-fill me-1"></i> <span th:text="${mensaje}"></span></span>
+            <a th:href="@{/boleta/{id}(id=${idBoleta})}" target="_blank" class="btn btn-success btn-sm">
+                <i class="bi bi-printer me-1"></i> Imprimir boleta
+            </a>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-xl-7">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-search me-2"></i>Buscar producto</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+                            <input type="text" id="buscar" class="form-control" autofocus>
+                        </div>
+                        <div class="w-100 overflow-auto">
+                            <table id="tablaProductos" class="table table-hover table-sm align-middle">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Producto</th>
+                                        <th class="text-end">Precio</th>
+                                        <th class="text-center">Stock</th>
+                                        <th class="text-center" style="width: 150px">Cantidad</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="p : ${listaproductos}">
+                                        <td th:text="${p.codigo}"></td>
+                                        <td th:text="${p.nombre}"></td>
+                                        <td class="text-end" th:text="${#numbers.formatDecimal(p.precioVenta, 1, 2, 'POINT')}"></td>
+                                        <td class="text-center">
+                                            <span th:text="${p.stock}"
+                                                  th:classappend="${p.stock == 0} ? 'badge bg-danger' : (${p.stockBajo} ? 'badge bg-warning text-dark' : '')"></span>
+                                        </td>
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <input type="number" class="form-control cantidad" value="1" min="1"
+                                                       th:max="${p.stock}" th:disabled="${p.stock == 0}">
+                                                <button type="button" class="btn btn-primary" title="Agregar"
+                                                        th:disabled="${p.stock == 0}"
+                                                        th:data-id="${p.idProducto}"
+                                                        th:data-codigo="${p.codigo}"
+                                                        th:data-nombre="${p.nombre}"
+                                                        th:data-precio="${p.precioVenta}"
+                                                        th:data-stock="${p.stock}"
+                                                        onclick="agregar(this)">
+                                                    <i class="bi bi-plus-lg"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-5">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Detalle de la venta</h5>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="vaciar()">
+                            <i class="bi bi-trash"></i> Vaciar
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <form id="formVenta" th:action="@{/registrarventa}" method="post">
+                            <table class="table table-sm align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th class="text-center">Cant.</th>
+                                        <th class="text-end">P. Unit.</th>
+                                        <th class="text-end">Subtotal</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detalle">
+                                    <tr id="filaVacia">
+                                        <td colspan="5" class="text-center text-muted py-4">
+                                            <i class="bi bi-cart d-block fs-3"></i>
+                                            Aún no hay productos en la venta
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="fs-5">
+                                        <th colspan="3" class="text-end">TOTAL</th>
+                                        <th class="text-end" id="total">S/ 0.00</th>
+                                        <th></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            <button type="button" class="btn btn-success w-100 py-2" id="btnConfirmar" onclick="confirmarVenta()" disabled>
+                                <i class="bi bi-check2-circle me-1"></i> Confirmar venta y emitir boleta
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tablaProductos = crearTabla("#tablaProductos", "productos", { pageLength: 8, lengthMenu: [8, 15, 30] });
+        conectarBuscador("buscar", tablaProductos);
+
+        const carrito = new Map();
+
+        // agregar producto a la venta
+        function agregar(boton) {
+            const d = boton.dataset;
+            const cantidad = parseInt(boton.parentElement.querySelector(".cantidad").value, 10);
+            const stock = parseInt(d.stock, 10);
+            const enCarrito = carrito.has(d.id) ? carrito.get(d.id).cantidad : 0;
+
+            if (!cantidad || cantidad <= 0) {
+                Swal.fire({ icon: "warning", title: "Cantidad inválida", text: "Ingrese una cantidad mayor que cero." });
+                return;
+            }
+            if (enCarrito + cantidad > stock) {
+                Swal.fire({ icon: "warning", title: "Stock insuficiente",
+                            text: d.nombre + " solo tiene " + stock + " unidades disponibles." });
+                return;
+            }
+            carrito.set(d.id, { codigo: d.codigo, nombre: d.nombre, precio: parseFloat(d.precio),
+                                stock: stock, cantidad: enCarrito + cantidad });
+            dibujar();
+        }
+
+        // quitar producto de la venta
+        function quitar(id) {
+            carrito.delete(id);
+            dibujar();
+        }
+
+        // vaciar la venta
+        function vaciar() {
+            carrito.clear();
+            dibujar();
+        }
+
+        // mostrar el detalle y el total
+        function dibujar() {
+            const cuerpo = document.getElementById("detalle");
+            cuerpo.innerHTML = "";
+            let total = 0;
+
+            carrito.forEach(function (item, id) {
+                const subtotal = item.precio * item.cantidad;
+                total += subtotal;
+                const fila = document.createElement("tr");
+                fila.innerHTML =
+                    '<td>' + item.nombre +
+                    '  <input type="hidden" name="idProducto" value="' + id + '">' +
+                    '  <input type="hidden" name="cantidad" value="' + item.cantidad + '"></td>' +
+                    '<td class="text-center">' + item.cantidad + '</td>' +
+                    '<td class="text-end">' + item.precio.toFixed(2) + '</td>' +
+                    '<td class="text-end">' + subtotal.toFixed(2) + '</td>' +
+                    '<td><button type="button" class="btn btn-link text-danger p-0" title="Quitar" ' +
+                    '     onclick="quitar(\'' + id + '\')"><i class="bi bi-x-circle"></i></button></td>';
+                cuerpo.appendChild(fila);
+            });
+
+            if (carrito.size === 0) {
+                cuerpo.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">' +
+                    '<i class="bi bi-cart d-block fs-3"></i>Aún no hay productos en la venta</td></tr>';
+            }
+            document.getElementById("total").textContent = "S/ " + total.toFixed(2);
+            document.getElementById("btnConfirmar").disabled = carrito.size === 0;
+        }
+
+        // confirmar la venta
+        function confirmarVenta() {
+            const total = document.getElementById("total").textContent;
+            Swal.fire({
+                title: "¿Confirmar la venta?",
+                text: "Total a cobrar: " + total,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Sí, registrar",
+                cancelButtonText: "Seguir agregando"
+            }).then(function (resultado) {
+                if (resultado.isConfirmed) {
+                    document.getElementById("formVenta").submit();
+                }
+            });
+        }
+    </script>
+</div>
+</body>
+</html>

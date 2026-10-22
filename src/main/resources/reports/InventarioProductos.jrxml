@@ -1,0 +1,80 @@
+<jasperReport name="InventarioProductos" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" whenNoDataType="AllSectionsNoDetail">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="miConexion"/>
+	<query language="sql"><![CDATA[SELECT
+    p.codigo,
+    p.nombre,
+    c.nombre AS categoria,
+    p.precio_venta,
+    p.stock,
+    p.stock_minimo
+FROM tb_producto p
+INNER JOIN tb_categoria c
+    ON p.id_categoria = c.id_categoria
+WHERE p.estado = 1
+ORDER BY c.nombre, p.nombre]]></query>
+	<field name="codigo" class="java.lang.String"/>
+	<field name="nombre" class="java.lang.String"/>
+	<field name="categoria" class="java.lang.String"/>
+	<field name="precio_venta" class="java.math.BigDecimal"/>
+	<field name="stock" class="java.lang.Integer"/>
+	<field name="stock_minimo" class="java.lang.Integer"/>
+	<variable name="totalStock" class="java.lang.Integer" calculation="Sum">
+		<expression><![CDATA[$F{stock}]]></expression>
+	</variable>
+	<background splitType="Stretch"/>
+	<title height="40" splitType="Stretch">
+		<element kind="staticText" x="0" y="5" width="555" height="30" fontSize="16.0" bold="true">
+			<text><![CDATA[INVENTARIO DE PRODUCTOS]]></text>
+		</element>
+	</title>
+	<columnHeader height="25" splitType="Stretch">
+		<element kind="staticText" x="0" y="5" width="70" height="20" bold="true">
+			<text><![CDATA[Código]]></text>
+		</element>
+		<element kind="staticText" x="70" y="5" width="200" height="20" bold="true">
+			<text><![CDATA[Producto]]></text>
+		</element>
+		<element kind="staticText" x="270" y="5" width="100" height="20" bold="true">
+			<text><![CDATA[Categoría]]></text>
+		</element>
+		<element kind="staticText" x="370" y="5" width="60" height="20" bold="true">
+			<text><![CDATA[Precio]]></text>
+		</element>
+		<element kind="staticText" x="430" y="5" width="55" height="20" bold="true">
+			<text><![CDATA[Stock]]></text>
+		</element>
+		<element kind="staticText" x="485" y="5" width="70" height="20" bold="true">
+			<text><![CDATA[Mínimo]]></text>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<element kind="textField" x="0" y="2" width="70" height="20">
+				<expression><![CDATA[$F{codigo}]]></expression>
+			</element>
+			<element kind="textField" x="70" y="2" width="200" height="20">
+				<expression><![CDATA[$F{nombre}]]></expression>
+			</element>
+			<element kind="textField" x="270" y="2" width="100" height="20">
+				<expression><![CDATA[$F{categoria}]]></expression>
+			</element>
+			<element kind="textField" x="370" y="2" width="60" height="20" pattern="#,##0.00">
+				<expression><![CDATA[$F{precio_venta}]]></expression>
+			</element>
+			<element kind="textField" x="430" y="2" width="55" height="20">
+				<expression><![CDATA[$F{stock}]]></expression>
+			</element>
+			<element kind="textField" x="485" y="2" width="70" height="20">
+				<expression><![CDATA[$F{stock_minimo}]]></expression>
+			</element>
+		</band>
+	</detail>
+	<summary height="40" splitType="Stretch">
+		<element kind="staticText" x="270" y="10" width="160" height="20" bold="true">
+			<text><![CDATA[TOTAL UNIDADES EN STOCK]]></text>
+		</element>
+		<element kind="textField" x="430" y="10" width="55" height="20" bold="true">
+			<expression><![CDATA[$V{totalStock}]]></expression>
+		</element>
+	</summary>
+</jasperReport>

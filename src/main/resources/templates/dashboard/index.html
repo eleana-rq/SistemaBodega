@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Dashboard')}">
+    <title></title>
+</head>
+<body th:replace="~{layout :: panel('dashboard',~{::contenido})}">
+    <main th:fragment="contenido" class="dashboard-content dashboard-home"
+          th:with="rol=${usuarioSesion.rol.nombre}">
+
+        <div th:if="${param.denegado}" class="alert alert-warning">
+            <i class="bi bi-shield-lock-fill me-1"></i>
+            Su rol no tiene acceso a la opción solicitada.
+        </div>
+
+        <section class="section-block dashboard-summary">
+            <div class="section-heading">
+                <h5>Resumen general</h5>
+            </div>
+            <div class="row g-4">
+                <div class="col-12 col-sm-6 col-xl-4">
+                    <div class="stat-card">
+                        <span class="stat-label">Productos</span>
+                        <h3 class="stat-value" th:text="${totalProductos}">0</h3>
+                        <div class="stat-description">Productos activos</div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-xl-4">
+                    <div class="stat-card">
+                        <span class="stat-label">Inventario</span>
+                        <h3 class="stat-value" th:text="${#lists.size(listastockbajo)}">0</h3>
+                        <div class="stat-description">Productos con stock bajo</div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-xl-4">
+                    <div class="stat-card">
+                        <span class="stat-label">Ventas de hoy</span>
+                        <h3 class="stat-value" th:text="${ventasHoy}">0</h3>
+                        <div class="stat-description"
+                             th:text="'S/ ' + ${#numbers.formatDecimal(montoHoy, 1, 'COMMA', 2, 'POINT')}">S/ 0.00</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <div class="section-heading">
+                <h5>Alertas de reposición</h5>
+            </div>
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(listastockbajo)}" class="text-muted">
+                        No hay productos con stock bajo.
+                    </div>
+                    <table th:unless="${#lists.isEmpty(listastockbajo)}" class="table table-sm align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Código</th>
+                                <th>Producto</th>
+                                <th>Categoría</th>
+                                <th class="text-center">Stock</th>
+                                <th class="text-center">Mínimo</th>
+                                <th>Situación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="p : ${listastockbajo}">
+                                <td th:text="${p.codigo}"></td>
+                                <td th:text="${p.nombre}"></td>
+                                <td th:text="${p.categoria.nombre}"></td>
+                                <td class="text-center fw-bold" th:text="${p.stock}"></td>
+                                <td class="text-center" th:text="${p.stockMinimo}"></td>
+                                <td>
+                                    <span th:if="${p.stock == 0}" class="badge bg-danger">Agotado</span>
+                                    <span th:if="${p.stock > 0}" class="badge bg-warning text-dark">Stock bajo</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
